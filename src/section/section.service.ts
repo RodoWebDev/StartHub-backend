@@ -98,9 +98,9 @@ export class SectionService {
   }
 
   async saveSectionToDB(data: SectionDto){
-    if (data.pageType) {
-      try {
-        if (!data.id) {
+    try {
+      if (!data.id) {
+        if (data.pageType) {
           const tempNewSection = {
             ...data
           };
@@ -111,29 +111,29 @@ export class SectionService {
           await page.save();
           return;
         } else {
-          const _id = typeof data.id === 'string' && data.id !== '' ? new Types.ObjectId(data.id) : data.id;
-          const section = await this.sectionFindById(_id);
-          section.type = data.type;
-          if (data.imgUrl !== '') {
-            section.imgUrl = data.imgUrl;
-          }
-          section.subTitle = data.subTitle;
-          section.title = data.title;
-          section.originalname = data.originalname;
-          section.action = data.action;
-          section.description = data.description;
-          return await section.save();
+          throw new HttpException(
+            'SECTIONS.ADD.MISSING_MANDATORY_PARAMETERS',
+            HttpStatus.FORBIDDEN,
+          );
         }
-      } catch (err) {
-        console.log(err);
-        throw new HttpException(
-          'SECTIONS.ADD.ERROR',
-          HttpStatus.FORBIDDEN,
-        );
+      } else {
+        const _id = typeof data.id === 'string' && data.id !== '' ? new Types.ObjectId(data.id) : data.id;
+        const section = await this.sectionFindById(_id);
+        section.type = data.type;
+        if (data.imgUrl !== '') {
+          section.imgUrl = data.imgUrl;
+        }
+        section.subTitle = data.subTitle;
+        section.title = data.title;
+        section.originalname = data.originalname;
+        section.action = data.action;
+        section.description = data.description;
+        return await section.save();
       }
-    } else {
+    } catch (err) {
+      console.log(err);
       throw new HttpException(
-        'SECTIONS.ADD.MISSING_MANDATORY_PARAMETERS',
+        'SECTIONS.ADD.ERROR',
         HttpStatus.FORBIDDEN,
       );
     }
@@ -145,9 +145,9 @@ export class SectionService {
   }
 
   async saveItemToDB(data: ItemsDto){
-    if (data.sectionType) {
-      try {
-        if (data.id === '') {
+    try {
+      if (data.id === '') {
+        if (data.sectionType) {
           const tempNewItem = {
             ...data
           };
@@ -158,26 +158,26 @@ export class SectionService {
           await section.save();
           return;
         } else {
-          const _id = typeof data.id === 'string' && data.id !== '' ? new Types.ObjectId(data.id) : data.id;
-          const item = await this.findById(_id);
-          if (data.imgUrl !== '') {
-            item.imgUrl = data.imgUrl;
-          }
-          item.title = data.title;
-          item.description = data.description;
-          item.originalname = data.originalname;
-          item.action = data.action;
-          item.value = data.value;
-          return await item.save();
+          throw new HttpException(
+            'ITEMS.ADD.MISSING_MANDATORY_PARAMETERS',
+            HttpStatus.FORBIDDEN,
+          );
         }
-      } catch (err) {
-        console.log(err)
+      } else {
+        const _id = typeof data.id === 'string' && data.id !== '' ? new Types.ObjectId(data.id) : data.id;
+        const item = await this.findById(_id);
+        if (data.imgUrl !== '') {
+          item.imgUrl = data.imgUrl;
+        }
+        item.title = data.title;
+        item.description = data.description;
+        item.originalname = data.originalname;
+        item.action = data.action;
+        item.value = data.value;
+        return await item.save();
       }
-    } else {
-      throw new HttpException(
-        'ITEMS.ADD.MISSING_MANDATORY_PARAMETERS',
-        HttpStatus.FORBIDDEN,
-      );
+    } catch (err) {
+      console.log(err)
     }
   }
 }

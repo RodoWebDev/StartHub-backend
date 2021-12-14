@@ -38,7 +38,7 @@ export class SectionController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @ApiOperation({ summary: 'Add page API with page informations' })
+  @ApiOperation({ summary: 'Add or Update page API with page informations' })
   @ApiResponse({ status: 200, description: 'Success Response', type: PagesDto})
   @Post('page')
   @ApiBody({
@@ -137,12 +137,12 @@ export class SectionController {
         id: sectionInfo.id,
         pageType: sectionInfo.pageType,
         type: sectionInfo.type,
-        title: sectionInfo.title.split(","),
+        title: JSON.parse(sectionInfo.title),
         imgUrl: img_url,
         originalname: img ? img.originalname : '',
         subTitle: sectionInfo.subTitle,
         action: sectionInfo.action,
-        description: sectionInfo.description.split(".,"),
+        description: JSON.parse(sectionInfo.description),
       };
       await this.SectionService.saveSectionToDB(data);
       return "added";
