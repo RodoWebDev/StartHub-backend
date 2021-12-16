@@ -6,6 +6,7 @@ import { SectionModule } from 'section/section.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { EmailModule } from './email/email.module';
+import { RegisterModule } from 'register/register.module';
 import { default as config } from './config';
 
 const userString = config.db.user && config.db.pass ? (config.db.user + ':' + config.db.pass + '@') : '';
@@ -17,6 +18,7 @@ const authSource = `?ssl=true&retrywrites=false&maxIdleTimeMS=120000&appName=@${
     AuthModule,
     UsersModule,
     SectionModule,
+    RegisterModule,
   ],
   controllers: [AppController],
   providers: [AppService],
