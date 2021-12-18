@@ -78,8 +78,22 @@ export class RegisterController {
         fileUrl: file_url,
         originalname: file ? file.originalname : '',
       };
-      await this.RegisterService.saveCompanyToDB(data);
-      return "added";
+      const response = await this.RegisterService.saveCompanyToDB(data);
+      console.log("response =>", response);
+      return response._id;
+    } catch (error) {
+      return new ResponseError('COMPANY.ADD.ERROR', error);
+    }
+  }
+
+  @ApiOperation({ summary: 'Add or Update company details API' })
+  @ApiResponse({ status: 200, description: 'Success Response'})
+  @Post('company/details')
+  async addCompanyDetails(@Body() CompanyDetails){
+    try {
+      const response = await this.RegisterService.saveCompanyDetailsToDB(CompanyDetails);
+      console.log('response =>', response);
+      return false;
     } catch (error) {
       return new ResponseError('COMPANY.ADD.ERROR', error);
     }
