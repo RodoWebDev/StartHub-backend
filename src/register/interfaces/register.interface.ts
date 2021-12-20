@@ -819,3 +819,39 @@ export class CompanyInterface {
 	@ApiProperty()
 	generalManagerSignature5: string;
 }
+export class VideoInterface {
+	constructor(object: any) {
+		this.firstName = object.firstName;
+		this.lastName = object.lastName;
+		this.originalname = object.originalname;
+		this.email = object.email;
+		this.phone = object.phone;
+		this.businessType = object.businessType;
+		this.fileUrl = object.fileUrl;
+		this.applicationDate = object.applicationDate;
+	}
+
+	@ApiProperty()
+	firstName: string;
+
+	@ApiProperty()
+	lastName: string;
+
+	@ApiProperty()
+	originalname: string;
+
+	@ApiProperty()
+	email: string;
+
+	@ApiProperty()
+	phone: string;
+
+	@ApiProperty()
+	businessType: string;
+
+	@ApiProperty()
+	fileUrl: string;
+
+	@ApiProperty()
+	applicationDate: Date;
+}

@@ -594,3 +594,15 @@ export const CompanySchema = new mongoose.Schema({
 	generalManagerSignature5: String,
   createdAt: { type: Date, default: Date.now },
 });
+
+export const VideoSchema = new mongoose.Schema({
+  firstName: String,
+  lastName: String,
+  originalname: String,
+  email: String,
+  phone: String,
+  businessType: String,
+  fileUrl: String,
+  applicationDate: Date,
+  createdAt: { type: Date, default: Date.now },
+});

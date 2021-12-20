@@ -3,13 +3,14 @@ import {
 } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RegisterController } from './register.controller';
-import { CompanySchema } from './schemas/register.schema';
+import { CompanySchema, VideoSchema } from './schemas/register.schema';
 import { LoggerMiddleware } from '../common/middlewares/logger.middleware';
 import { RegisterService } from './register.service';
 
 @Module({
   imports: [MongooseModule.forFeature([
     { name: 'Companies', schema: CompanySchema },
+    { name: 'Videos', schema: VideoSchema },
   ])],
   controllers: [RegisterController],
   providers: [RegisterService],

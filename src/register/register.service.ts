@@ -1,9 +1,8 @@
 import { CallHandler, ExecutionContext, HttpException, HttpStatus, Injectable, NestInterceptor } from '@nestjs/common';
 import { BlobServiceClient, BlockBlobClient } from '@azure/storage-blob';
 import { Model, Types } from 'mongoose';
-import { CompanyInterface } from './interfaces/register.interface';
+import { CompanyInterface, VideoInterface } from './interfaces/register.interface';
 import { InjectModel } from '@nestjs/mongoose';
-import { CompanyDto } from './dto/register.dto';
 import { Observable } from 'rxjs';
 
 @Injectable()
@@ -22,14 +21,23 @@ export class RegisterExtender implements NestInterceptor {
 export class RegisterService {
 	constructor(
     @InjectModel('Companies') private readonly companiesModel: Model<CompanyInterface>,
+    @InjectModel('Videos') private readonly videosModel: Model<VideoInterface>,
 	) { }
 
   azureConnection = process.env.AZURE_CONNECTION_STRING;
-  containerName = process.env.AZURE_FILE_CONTAINER_NAME;
+  containerFileName = process.env.AZURE_FILE_CONTAINER_NAME;
+  containerVideoName = process.env.AZURE_VIDEO_CONTAINER_NAME;
 
   getBlobClient(imageName:string):BlockBlobClient{
     const blobClientService = BlobServiceClient.fromConnectionString(this.azureConnection);
-    const containerClient = blobClientService.getContainerClient(this.containerName);
+    const containerClient = blobClientService.getContainerClient(this.containerFileName);
+    const blobClient = containerClient.getBlockBlobClient(imageName);
+    return blobClient;
+  }
+
+  getBlobClientVideo(imageName:string):BlockBlobClient{
+    const blobClientService = BlobServiceClient.fromConnectionString(this.azureConnection);
+    const containerClient = blobClientService.getContainerClient(this.containerVideoName);
     const blobClient = containerClient.getBlockBlobClient(imageName);
     return blobClient;
   }
@@ -45,13 +53,21 @@ export class RegisterService {
     await blobClient.deleteIfExists();
   }
 
-  async upload(file:Express.Multer.File){
-    const blobClient = this.getBlobClient(file.originalname);
+  async upload(file:Express.Multer.File, type, filename = ''){
+    if (type === 'file') {
+      const blobClient = this.getBlobClient(file.originalname);
+      await blobClient.uploadData(file.buffer);
+    }
+    const blobClient = this.getBlobClientVideo(filename);
     await blobClient.uploadData(file.buffer);
   }
 
   async getCompanies(): Promise<CompanyInterface[]> {
     return await this.companiesModel.find().exec();
+  }
+
+  async getVideos(): Promise<VideoInterface[]> {
+    return await this.videosModel.find().exec();
   }
 
   async saveCompanyToDB(data: any){
@@ -63,7 +79,6 @@ export class RegisterService {
   }
 
   async saveCompanyDetailsToDB(data: any) {
-    console.log('data =>', data)
     try {
       const _id = typeof data.companyId === 'string' && (data.companyId.length === 12 || data.companyId.length === 24) ? new Types.ObjectId(data.companyId) : data.companyId;
       const item = await this.companiesModel.findById(_id);
@@ -265,10 +280,17 @@ export class RegisterService {
       item.generalManagerName5 = data.generalManagerName5;
       item.generalManagerSignature5 = data.generalManagerSignature5;
       delete data.companyId;
-      console.log('item =>', item)
       return await item.save();
     } catch (err) {
       console.log('err =>', err);
     }
+  }
+
+  async saveVideoToDB(data: any){
+    const tempNewApp = {
+      ...data
+    };
+    const createdApp = new this.videosModel(tempNewApp);
+    return await createdApp.save();
   }
 }
