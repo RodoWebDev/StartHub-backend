@@ -121,7 +121,7 @@ export class RegisterController {
   })
   @UseInterceptors(RegisterExtender)
   @UseInterceptors(FileInterceptor('file'))
-  async addVideo(@UploadedFile() file, @Body() companyInfo){
+  async addVideo(@UploadedFile() file, @Body() videoInfo){
     const filename = `${uuidv4()}.${file.originalname.split('.').pop()}`;
     if (file) {
       await this.RegisterService.upload(file, 'video', filename);
@@ -129,16 +129,16 @@ export class RegisterController {
     const file_url = file ? `https://${process.env.AZURE_STORAGE_NAME}.blob.core.windows.net/${process.env.AZURE_VIDEO_CONTAINER_NAME}/${filename}` : '';
     try {
       const data = {
-        firstName: companyInfo.firstName,
-        lastName: companyInfo.lastName,
-        email: companyInfo.email,
-        phone: companyInfo.phone,
-        businessType: companyInfo.businessType,
-        applicationDate: companyInfo.applicationDate,
+        firstName: videoInfo.firstName,
+        lastName: videoInfo.lastName,
+        email: videoInfo.email,
+        phone: videoInfo.phone,
+        businessType: videoInfo.businessType,
+        applicationDate: videoInfo.applicationDate,
         fileUrl: file_url,
         originalname: file ? file.originalname : '',
       };
-      const response = await this.RegisterService.saveVideoToDB(data);
+      await this.RegisterService.saveVideoToDB(data);
       return true;
     } catch (error) {
       return new ResponseError('COMPANY.ADD.ERROR', error);
@@ -157,6 +157,54 @@ export class RegisterController {
       return new ResponseSuccess('REGISTER.GETALLVIDEOS.SUCCESS', response);
     } catch (error) {
       return new ResponseError('REGISTER.GETALLVIDEOS.ERROR', error);
+    }
+  }
+
+  @ApiOperation({ summary: 'Upload Recorded Video API' })
+  @ApiResponse({ status: 200, description: 'Success Response', type: VideoDto})
+  @Post('record')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        firstName: { type: 'string' },
+        lastName: { type: 'string' },
+        email: { type: 'string' },
+        phone: { type: 'string' },
+        businessType: { type: 'string' },
+        applicationDate: { type: 'date' },
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @UseInterceptors(RegisterExtender)
+  @UseInterceptors(FileInterceptor('file'))
+  async addRecordedVideo(@UploadedFile() file, @Body() videoInfo){
+    const filename = `webcam_record_${uuidv4()}.mp4`;
+    if (file) {
+      await this.RegisterService.upload(file, 'video', filename);
+    }
+    const file_url = file ? `https://${process.env.AZURE_STORAGE_NAME}.blob.core.windows.net/${process.env.AZURE_VIDEO_CONTAINER_NAME}/${filename}` : '';
+    try {
+      const data = {
+        firstName: videoInfo.firstName,
+        lastName: videoInfo.lastName,
+        email: videoInfo.email,
+        phone: videoInfo.phone,
+        businessType: videoInfo.businessType,
+        applicationDate: videoInfo.applicationDate,
+        fileUrl: file_url,
+        originalname: file ? filename : '',
+      };
+      console.log('data =>', data)
+      await this.RegisterService.saveVideoToDB(data);
+      return true;
+    } catch (error) {
+      return new ResponseError('COMPANY.ADD.ERROR', error);
     }
   }
 }
